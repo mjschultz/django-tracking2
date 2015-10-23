@@ -3,13 +3,15 @@ from django.core.cache import cache
 from django.conf import settings
 from tracking.models import Visitor
 from tracking.cache import instance_cache_key
+from tracking.utils import short_session_key
 
 SESSION_COOKIE_AGE = getattr(settings, 'SESSION_COOKIE_AGE')
 
 
 def track_ended_session(sender, request, user, **kwargs):
+    session_key = short_session_key(request.session.session_key)
     try:
-        visitor = Visitor.objects.get(pk=request.session.session_key)
+        visitor = Visitor.objects.get(pk=session_key)
     # This should rarely ever occur.. e.g. direct request to logout
     except Visitor.DoesNotExist:
         return

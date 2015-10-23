@@ -2,12 +2,24 @@ from __future__ import division
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
+from hashlib import sha1
 
 headers = (
     'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED',
     'HTTP_X_CLUSTERED_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED',
     'REMOTE_ADDR'
 )
+
+
+def short_session_key(session_key):
+    """
+    Some SESSION_ENGINEs have a session_key larger than tracking2s database
+    field allows, this makes sure it fits in the database.
+    """
+    if len(session_key) <= 40:
+        return session_key
+    else:
+        return sha1(session_key).hexdigest()
 
 
 def get_ip_address(request):

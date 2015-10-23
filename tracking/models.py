@@ -11,6 +11,7 @@ from django.db.models.signals import post_save
 from tracking.managers import VisitorManager, PageviewManager
 from tracking.settings import TRACK_USING_GEOIP
 from .compat import User
+from .utils import short_session_key
 
 GEOIP_CACHE_TYPE = getattr(settings, 'GEOIP_CACHE_TYPE', 4)
 
@@ -43,6 +44,10 @@ class Visitor(models.Model):
         "The session has ended due to an explicit logout"
         return bool(self.end_time)
     session_ended.boolean = True
+
+    def save(self, *args, **kwargs):
+        self.session_key = short_session_key(self.session_key)
+        return super(Visitor, self).save(*args, **kwargs)
 
     @property
     def geoip_data(self):

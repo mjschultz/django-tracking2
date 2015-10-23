@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 
 from tracking.models import Visitor, Pageview
-from tracking.utils import get_ip_address, total_seconds
+from tracking.utils import get_ip_address, total_seconds, short_session_key
 from tracking.settings import (
     TRACK_AJAX_REQUESTS,
     TRACK_ANONYMOUS_USERS,
@@ -55,7 +55,7 @@ class VisitorTrackingMiddleware(object):
 
     def _refresh_visitor(self, user, request, visit_time):
         # A Visitor row is unique by session_key
-        session_key = request.session.session_key
+        session_key = short_session_key(request.session.session_key)
 
         try:
             visitor = Visitor.objects.get(pk=session_key)

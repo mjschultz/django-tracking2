@@ -1,6 +1,7 @@
 from __future__ import division
 
 from datetime import timedelta
+from hashlib import sha1
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -194,3 +195,13 @@ class VisitorManagerTestCase(TestCase):
             }
         }
         self.assertEqual(stats, expected)
+
+    def test_session_key(self):
+        key = 'A'*128
+        Visitor.objects.create(
+            user=self.user1, start_time=self.past, session_key=key
+        )
+
+        visitor = Visitor.objects.first()
+
+        self.assertEqual(visitor.session_key, sha1(key).hexdigest())
